@@ -19,7 +19,7 @@ app.use(bodyParser.json())
 
 app.post('/api/register', async (req, res)=> {
     console.log(req.body)
-    const { barcode, first_name, last_name, password: plainTextPassword, password_confirm } = req.body
+    const { barcode, first_name, last_name, password: plainTextPassword} = req.body
     if(plainTextPassword.length < 7) {
         return res.json({status:'error', error: 'Password too small. Should be at least 7 characters'})
     }
@@ -38,8 +38,7 @@ app.post('/api/register', async (req, res)=> {
             barcode,
             first_name,
             last_name,
-            password,
-            password_confirm
+            password
         })
         console.log('User created successfully: ', response)
     }
