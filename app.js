@@ -23,6 +23,10 @@ app.get('/login', (req, res) => {
     res.sendFile(__dirname+"/templates/login.html")
 })
 
+app.get('/profile', (req,res)=>{
+    res.sendFile(__dirname +"/templates/profile.html")
+})
+
 app.use(bodyParser.json())
 
 app.post('/api/login', async (req, res) =>{
@@ -35,7 +39,6 @@ app.post('/api/login', async (req, res) =>{
 
     if(await bcrypt.compare(password, user.password)) {
         //username, password combination is successful
-
         const token= jwt.sign({
             id: user._id,
             barcode: user.barcode},
