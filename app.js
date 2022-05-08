@@ -1,13 +1,23 @@
 const express = require ('express')
-const path = require ('path')
-var parseUrl=require('body-parser')
-let encodeUrl=parseUrl.urlencoded({extended: true})
+const bodyParser=require('body-parser')
+const mongoose = require('mongoose')
+const user = require ('./model/user')
+mongoose.connect('mongodb://localhost:27017/login-db', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+})
 
 const app = express()
-app.use(encodeUrl)
 
 app.get('/', (req, res) => {
     res.sendFile(__dirname+"/templates/register.html")
+})
+
+app.use(bodyParser.json())
+
+app.post('/api/register', async (req, res)=> {
+    console.log(req.body)
+    res.json({status: 'ok'})
 })
 
 app.listen(9999, ()=>{
