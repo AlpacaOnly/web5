@@ -18,7 +18,7 @@
             <img src="../static/images/logo.png" alt="AITU logo" class="img-fluid">
         </div>
         <div class="col-lg-4">
-            <form method="POST">
+            <form method="POST" id="reg-form">
                 <div class="mb-3">
                     <label for="barcode-input" class="form-label">Barcode</label>
                     <input type="number" class="form-control" id="barcode-input" name="barcode" required>
@@ -40,7 +40,7 @@
                     <input type="password" class="form-control" minlength="8" id="password-confirm-input" name="password-confirm" required>
                 </div>
                 <a href="{{ url_for('auth.login') }}" class="d-block text-secondary text-decoration-none mb-3">Already have an account?</a>
-                <button type="submit" class="btn btn-primary">Submit</button>
+                <button type="submit" value="Submit Form" class="btn btn-primary">Submit</button>
             </form>
         </div>
     </div>
@@ -49,9 +49,24 @@
     const form = document.getElementById('reg-form')
     form.addEventListener('submit', registerUser )
 
-    function registerUser(event) {
+    async function registerUser(event) {
         event.preventDefault()
-        const barcode = document.getElementById('barcode')
+        const barcode = document.getElementById('barcode-input').value
+        const first_name = document.getElementById('first-name-input').value
+        const last_name = document.getElementById('last-name-input').value
+        const password = document.getElementById('password-input').value
+        const password_confirm = document.getElementById('password-confirm-input').value
+
+        const result = await fetch('/api/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type' :'application/json'
+            },
+            body: JSON.stringify({
+                barcode, first_name, last_name, password, password_confirm
+            })
+        }).then((res)=>res.json())
+        console.log(result)
     }
 </script>
 
