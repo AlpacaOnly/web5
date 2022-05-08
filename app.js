@@ -1,8 +1,13 @@
 const express = require ('express')
 const bodyParser=require('body-parser')
 const mongoose = require('mongoose')
-const user = require ('./model/user')
+const User = require ('./model/user')
 const bcrypt = require ('bcryptjs')
+const sessions = require ('express-session')
+const cookieParser = require ('cookie-parser')
+const jwt = require("jsonwebtoken");
+
+const Jwt_secret = 'oesmjenxijmwqs xiok,mpw29nq81nmc18bs'
 mongoose.connect('mongodb://localhost:27017/login-db',
     {
         useNewUrlParser: true,
@@ -10,12 +15,36 @@ mongoose.connect('mongodb://localhost:27017/login-db',
     })
 
 const app = express()
-
 app.get('/', (req, res) => {
     res.sendFile(__dirname+"/templates/register.html")
 })
 
+app.get('/login', (req, res) => {
+    res.sendFile(__dirname+"/templates/login.html")
+})
+
 app.use(bodyParser.json())
+
+app.post('/api/login', async (req, res) =>{
+    const {barcode, password} = req.body
+    const user = await User.findOne({barcode}).lean()
+
+    if(!user) {
+        return res.json({status: 'error', error: 'Invalid barcode/password'})
+    }
+
+    if(await bcrypt.compare(password, user.password)) {
+        //username, password combination is successful
+
+        const token= jwt.sign({
+            id: user._id,
+            barcode: user.barcode},
+            Jwt_secret
+        )
+        return res.json({status: 'ok', data: token})
+    }
+    return res.json({status: 'error', error: 'Invalid barcode/password'})
+})
 
 app.post('/api/register', async (req, res)=> {
     console.log(req.body)
