@@ -66,6 +66,12 @@
                 barcode, first_name, last_name, password, password_confirm
             })
         }).then((res)=>res.json())
+
+        if (result.status === 'ok') {
+            alert('Success')
+        } else {
+            alert(result.error)
+        }
         console.log(result)
     }
 </script>
