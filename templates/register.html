@@ -68,7 +68,7 @@
         }).then((res)=>res.json())
 
         if (result.status === 'ok') {
-            alert('Success')
+            window.location = 'http://localhost:9999/profile'
         } else {
             alert(result.error)
         }

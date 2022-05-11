@@ -1,11 +1,12 @@
 const express = require ('express')
 const bodyParser=require('body-parser')
 const mongoose = require('mongoose')
-const User = require ('./model/user')
+const User_model = require ('./model/user')
 const bcrypt = require ('bcryptjs')
 const sessions = require ('express-session')
 const cookieParser = require ('cookie-parser')
-const jwt = require("jsonwebtoken");
+const jwt = require("jsonwebtoken")
+const path = require("path")
 
 const Jwt_secret = 'oesmjenxijmwqs xiok,mpw29nq81nmc18bs'
 mongoose.connect('mongodb://localhost:27017/login-db',
@@ -15,6 +16,12 @@ mongoose.connect('mongodb://localhost:27017/login-db',
     })
 
 const app = express()
+app.set('views', path.join(__dirname, 'views'))
+app.set('view engine', 'ejs')
+
+app.use(bodyParser.json())
+app.use(cookieParser())
+
 app.get('/', (req, res) => {
     res.sendFile(__dirname+"/templates/register.html")
 })
@@ -24,14 +31,18 @@ app.get('/login', (req, res) => {
 })
 
 app.get('/profile', (req,res)=>{
-    res.sendFile(__dirname +"/templates/profile.html")
+    res.render('profile',{user: req.cookies.user})
 })
 
-app.use(bodyParser.json())
+app.get('/editInfo', async (req, res) => {
+    const users = await User_model.find({}).lean()
+    console.log(users)
+    res.render('index', {users:users})
+})
 
 app.post('/api/login', async (req, res) =>{
     const {barcode, password} = req.body
-    const user = await User.findOne({barcode}).lean()
+    const user = await User_model.findOne({barcode}).lean()
 
     if(!user) {
         return res.json({status: 'error', error: 'Invalid barcode/password'})
@@ -44,13 +55,13 @@ app.post('/api/login', async (req, res) =>{
             barcode: user.barcode},
             Jwt_secret
         )
+        res.cookie('user', user)
         return res.json({status: 'ok', data: token})
     }
     return res.json({status: 'error', error: 'Invalid barcode/password'})
 })
 
 app.post('/api/register', async (req, res)=> {
-    console.log(req.body)
     const { barcode, first_name, last_name, password: plainTextPassword} = req.body
     if(plainTextPassword.length < 7) {
         return res.json({status:'error', error: 'Password too small. Should be at least 7 characters'})
@@ -66,7 +77,7 @@ app.post('/api/register', async (req, res)=> {
     }
     const password = await bcrypt.hash(plainTextPassword, 10)
     try {
-        const response = await user.create({
+        const response = await User_model.create({
             barcode,
             first_name,
             last_name,
