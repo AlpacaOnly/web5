@@ -42,8 +42,8 @@ app.get('/editInfo', async (req, res) => {
 
 app.post('/api/login', async (req, res) =>{
     const {barcode, password} = req.body
-    const user = await User_model.findOne({barcode}).lean()
-
+    const user = await User_model.findOne({barcode}).lean();
+    const id = await User_model.findOne({barcode}).lean().distinct("barcode")
     if(!user) {
         return res.json({status: 'error', error: 'Invalid barcode/password'})
     }
@@ -92,6 +92,20 @@ app.post('/api/register', async (req, res)=> {
         throw error
     }
     res.json({status: 'ok'})
+})
+
+app.get('/delete_user/:id', (req,res)=>{
+    function delete_user(user) {
+        User_model.deleteOne(user)
+        res('user deleted')
+    }
+})
+
+app.get('/logout', (req,res)=>{
+    if (sessions != null) {
+        sessions().delete
+    }
+    res.redirect('http://localhost:9999/login')
 })
 
 app.listen(9999, ()=>{
